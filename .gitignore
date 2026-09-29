@@ -1,0 +1,20 @@
+# Java compiled files
+*.class
+
+# Build directories
+out/
+target/
+
+# IntelliJ
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Environment/secrets
+.env
