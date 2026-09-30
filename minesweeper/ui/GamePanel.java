@@ -136,4 +136,30 @@ public class GamePanel extends JPanel{
         }
         mineLabel.setText("Mines: " + game.getRemainingMines());
     }
+
+    private void updateCellAppearance(int row, int col, Cell cell) {
+
+        if (cell.isFlagged()) {
+            cells[row][col].setText("🚩");
+            return;
+        }
+
+        if (!cell.isRevealed()) {
+            cells[row][col].setText("");
+            return;
+        }
+
+        if (cell.isMine()) {
+            cells[row][col].setText("💣");
+            return;
+        }
+
+        int mines = cell.getAdjacentMines();
+
+        if (mines == 0) {
+            cells[row][col].setText("");
+        } else {
+            cells[row][col].setText(String.valueOf(mines));
+        }
+    }
 }
