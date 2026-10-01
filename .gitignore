@@ -1,20 +1,23 @@
 # Java compiled files
 *.class
 
-# Build directories
-out/
-target/
+# VS Code
+.vscode/
 
 # IntelliJ
 .idea/
+*.iml
 
 # Eclipse
 .classpath
 .project
 .settings/
 
-# VS Code
-.vscode/
+# OS files
+.DS_Store
+Thumbs.db
 
-# Environment/secrets
-.env
+# Build directories
+bin/
+out/
+target/

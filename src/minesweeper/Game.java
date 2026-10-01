@@ -1,86 +1,188 @@
 package minesweeper;
 
-public class Game{
+public class Game {
+
     private Board board;
     private GameState gameState;
+
     private int revealedCells;
     private int flaggedCells;
 
-    public Game(){
-        board = new Board();  
-        gameState = GameState.PLAYING;  
+    private boolean firstMove;
+
+    public Game() {
+
+        board = new Board();
+        gameState = GameState.PLAYING;
+
         revealedCells = 0;
-        flaggedCells = 0;   
+        flaggedCells = 0;
+
+        firstMove = true;
     }
 
-    public int getRemainingMines() {
-        return board.getMineCount() - flaggedCells;
-    }
+    public void reveal(int row, int col) {
 
-    public void reveal(int row,int col){
-        Cell cell   = board.getCell(row, col);
-        if(gameState != GameState.PLAYING){
-            return ;
+        if (gameState != GameState.PLAYING) {
+            return;
         }
 
-        if(cell.isMine()){
+        Cell cell = board.getCell(row, col);
+
+        // Generate mines after the first click
+        if (firstMove) {
+
+            board.initialize(row, col);
+            firstMove = false;
+
+            cell = board.getCell(row, col);
+        }
+
+        // Flagged cells cannot be revealed
+        if (cell.isFlagged()) {
+            return;
+        }
+
+        // Already revealed
+        if (cell.isRevealed()) {
+            return;
+        }
+
+        // Mine
+        if (cell.isMine()) {
+
             gameState = GameState.LOST;
             return;
         }
 
-        if(cell.isRevealed()){
-            revealedCells++;
-            return;
-        }
+        cell.setRevealed(true);
+        revealedCells++;
 
-        if (revealedCells == board.getTotalCells()-board.getMineCount()) {
+        // Win condition
+        if (revealedCells ==
+            board.getTotalCells() - board.getMineCount()) {
+
             gameState = GameState.WON;
             return;
         }
 
-        cell.setRevealed(true);
+        // Reveal connected empty cells
+        if (cell.getAdjacentMines() == 0) {
 
-        if(cell.getAdjacentMines()==0){
             for (int dr = -1; dr <= 1; dr++) {
+
                 for (int dc = -1; dc <= 1; dc++) {
+
                     int newRow = row + dr;
                     int newCol = col + dc;
-                    
-                    if (newRow < 0 || newRow >= 10 || newCol < 0 || newCol >= 10) {
+
+                    if (newRow < 0 || newRow >= 10 ||
+                        newCol < 0 || newCol >= 10) {
                         continue;
                     }
-                    reveal(newRow,newCol);
+
+                    reveal(newRow, newCol);
                 }
             }
         }
     }
 
     public void toggleFlag(int row, int col) {
+
         if (gameState != GameState.PLAYING) {
             return;
         }
+
         Cell cell = board.getCell(row, col);
+
         if (cell.isRevealed()) {
             return;
         }
+
         if (cell.isFlagged()) {
+
             cell.setFlagged(false);
             flaggedCells--;
-        } 
-        else {
+
+        } else {
+
             if (flaggedCells >= board.getMineCount()) {
                 return;
             }
+
             cell.setFlagged(true);
             flaggedCells++;
         }
     }
-    
-    public Cell getCell(int row,int col){
+
+    public void chord(int row, int col) {
+
+        if (gameState != GameState.PLAYING) {
+            return;
+        }
+
+        Cell cell = board.getCell(row, col);
+
+        if (!cell.isRevealed()) {
+            return;
+        }
+
+        int flagged = 0;
+
+        for (int dr = -1; dr <= 1; dr++) {
+
+            for (int dc = -1; dc <= 1; dc++) {
+
+                int newRow = row + dr;
+                int newCol = col + dc;
+
+                if (newRow < 0 || newRow >= 10 ||
+                    newCol < 0 || newCol >= 10) {
+                    continue;
+                }
+
+                if (board.getCell(newRow, newCol).isFlagged()) {
+                    flagged++;
+                }
+            }
+        }
+
+        if (flagged != cell.getAdjacentMines()) {
+            return;
+        }
+
+        for (int dr = -1; dr <= 1; dr++) {
+
+            for (int dc = -1; dc <= 1; dc++) {
+
+                int newRow = row + dr;
+                int newCol = col + dc;
+
+                if (newRow < 0 || newRow >= 10 ||
+                    newCol < 0 || newCol >= 10) {
+                    continue;
+                }
+
+                Cell neighbour = board.getCell(newRow, newCol);
+
+                if (!neighbour.isFlagged() &&
+                    !neighbour.isRevealed()) {
+
+                    reveal(newRow, newCol);
+                }
+            }
+        }
+    }
+
+    public Cell getCell(int row, int col) {
         return board.getCell(row, col);
     }
 
-    public GameState getGameState(){
+    public GameState getGameState() {
         return gameState;
+    }
+
+    public int getRemainingMines() {
+        return board.getMineCount() - flaggedCells;
     }
 }
